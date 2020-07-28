@@ -11,6 +11,9 @@ I'm using Python 3.8 with Anaconda. Dependencies so far are:
 
 I'm mainly developing under Linux and Windows.
 
+## Roadmap
+Ideally, I'd want to run this thing in the background, and when it detects a change in the rescue dogs list (new dogs added to the list and adopted dogs removed from it) it should notify me reliably. I'd also like to parse the information a bit better to do some basic filtering of candidates.
+
 ## License
 
 Distributed under the GPLv3 license. See `LICENSE` for more information.

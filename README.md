@@ -1,5 +1,5 @@
 # doggo_finder_webscraper
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/github/license/LucaLoVerde/doggo_finder_webscraper?style=plastic)](https://www.gnu.org/licenses/gpl-3.0)
 
 Exercising a bit with webscraping using selenium with python. I started this when I realized that one of my favorite local animal rescue websites doesn't really offer any way of receiving updates when a new dog is added to the list. It's being enough of a frustrating experience so far that I thought I could try to learn a bit of webscraping methods. If you are looking for rigorous, clean stuff, be advised that this might not be the right place (:
 
@@ -10,6 +10,9 @@ I'm using Python 3.8 with Anaconda. Dependencies so far are:
 * A supported web browser (for now, works with Firefox and Chrome)
 
 I'm mainly developing under Linux and Windows.
+
+## Roadmap
+Ideally, I'd want to run this thing in the background, and when it detects a change in the rescue dogs list (new dogs added to the list and adopted dogs removed from it) it should notify me reliably. I'd also like to parse the information a bit better to do some basic filtering of candidates.
 
 ## License
 

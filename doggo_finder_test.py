@@ -9,11 +9,12 @@ updates.
 import time
 import sys
 from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 
 
-def open_connection(target_url: str) -> WebDriverClass:
+def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
     """Open connection with a selenium webdriver (Firefox for now) to a URL.
 
     Creates and returns a selenium webdriver object after initializing and
@@ -24,16 +25,22 @@ def open_connection(target_url: str) -> WebDriverClass:
     ----------
     target_url : str
         Webpage to fetch
+    instance_type : str
+        Type of webdriver instance (for now, 'Firefox' or 'Chrome')
 
     Returns
     -------
     WebDriverClass
         webdriver object initialized, window is minimized
     """
-    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    if instance_type.lower() == 'firefox':
+        driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    elif instance_type.lower() == 'chrome':
+        driver = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     driver.minimize_window()
     time.sleep(1)
     driver.get(target_url)
+    time.sleep(1)
     return driver
 
 
@@ -56,7 +63,7 @@ def fetch_dogs_list(driver: WebDriverClass) -> list:
         List of elements matching the spans containing dogs
     """
     driver.refresh()
-    time.sleep(1)
+    time.sleep(2)
     dog_list = driver.find_elements_by_xpath("//div[@class='dogs col-md-12']/span")
     dog_list = [dog.text for dog in dog_list]
     return dog_list
@@ -152,7 +159,7 @@ def close_connection(driver: WebDriverClass):
 if __name__ == "__main__":
     TARGET_URL = 'http://dpsrescue.org/adopt/available/'
 
-    my_driver = open_connection(TARGET_URL)
+    my_driver = open_connection(TARGET_URL, 'Chrome')
     lista = fetch_dogs_list(my_driver)
     diz = dog_list_to_dict(lista)
     dict_pretty_print(diz)

@@ -24,19 +24,26 @@ def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
     Parameters
     ----------
     target_url : str
-        Webpage to fetch
+        URL of page to fetch
     instance_type : str
-        Type of webdriver instance (for now, 'Firefox' or 'Chrome')
+        Type of webdriver instance ('firefox' or 'chrome')
 
     Returns
     -------
     WebDriverClass
-        webdriver object initialized, window is minimized
+        webdriver instance on target URL
+
+    Raises
+    ------
+    ValueError
+        Raised if a wrong 'instance_type' argument is provided
     """
     if instance_type.lower() == 'firefox':
         driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
     elif instance_type.lower() == 'chrome':
         driver = webdriver.Chrome(executable_path=ChromeDriverManager().install())
+    else:
+        raise ValueError("'instance_type' can be either 'firefox' or 'chrome'")
     driver.minimize_window()
     time.sleep(1)
     driver.get(target_url)
@@ -159,7 +166,7 @@ def close_connection(driver: WebDriverClass):
 if __name__ == "__main__":
     TARGET_URL = 'http://dpsrescue.org/adopt/available/'
 
-    my_driver = open_connection(TARGET_URL, 'Chrome')
+    my_driver = open_connection(TARGET_URL, 'firefox')
     lista = fetch_dogs_list(my_driver)
     diz = dog_list_to_dict(lista)
     dict_pretty_print(diz)

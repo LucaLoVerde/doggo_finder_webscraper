@@ -97,9 +97,44 @@ def dict_pretty_print(in_dict: dict):
     in_dict : dict
         Input dogs dictionary
     """
-    print("found {} dogs listed\n".format(len(in_dict)))
     for dog_name, attrs in in_dict.items():
         print("{}: {}, {}".format(dog_name, attrs[0], attrs[1]))
+
+
+def print_dicts_comparison(old_dict: dict, new_dict: dict) -> tuple:
+    """[summary].
+
+    // TODO docs
+
+    Parameters
+    ----------
+    old_dict : dict
+        [description]
+    new_dict : dict
+        [description]
+
+    Returns
+    -------
+    tuple
+        [description]
+    """
+    old_keys = set(old_dict.keys())
+    new_keys = set(new_dict.keys())
+    new_dogs = new_keys.difference(old_keys)
+    adopted_dogs = old_keys.difference(new_keys)
+    added_dogs_dict = {}
+    adopted_dogs_dict = {}
+    if len(new_dogs) == 0:
+        print('no dogs added.')
+    else:
+        for dog in new_dogs:
+            added_dogs_dict[dog] = new_dict[dog]
+    if len(adopted_dogs) == 0:
+        print("no dogs adopted.")
+    else:
+        for dog in adopted_dogs:
+            adopted_dogs_dict[dog] = old_dict[dog]
+    return (added_dogs_dict, adopted_dogs_dict)
 
 
 def close_connection(driver: WebDriverClass):

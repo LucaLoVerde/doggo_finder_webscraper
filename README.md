@@ -1,6 +1,20 @@
 # doggo_finder_webscraper
 [![License: GPL v3](https://img.shields.io/github/license/LucaLoVerde/doggo_finder_webscraper?style=plastic)](https://www.gnu.org/licenses/gpl-3.0)
 
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [doggo_finder_webscraper](#doggo_finder_webscraper)
+  - [Requirements](#requirements)
+  - [Roadmap](#roadmap)
+  - [License](#license)
+  - [Contact](#contact)
+
+<!-- /code_chunk_output -->
+
+
 Exercising a bit with webscraping using selenium with python. I started this when I realized that one of my favorite local animal rescue websites doesn't really offer any way of receiving updates when a new dog is added to the list. It's being enough of a frustrating experience so far that I thought I could try to learn a bit of webscraping methods. If you are looking for rigorous, clean stuff, be advised that this might not be the right place (:
 
 ## Requirements

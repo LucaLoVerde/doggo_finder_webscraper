@@ -161,7 +161,7 @@ def close_connection(driver: WebDriverClass):
     driver : WebDriverClass
         selenium webdriver instance to close
     """
-    driver.close()
+    driver.quit()
     time.sleep(1)
 
 

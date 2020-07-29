@@ -115,7 +115,7 @@ def dict_pretty_print(in_dict: dict):
         print("{}: {}, {}".format(dog_name, attrs[0], attrs[1]))
 
 
-def print_dicts_comparison(old_dict: dict, new_dict: dict) -> tuple:
+def compare_dicts(old_dict: dict, new_dict: dict) -> tuple:
     """[summary].
 
     // TODO docs
@@ -139,12 +139,14 @@ def print_dicts_comparison(old_dict: dict, new_dict: dict) -> tuple:
     added_dogs_dict = {}
     adopted_dogs_dict = {}
     if len(new_dogs) == 0:
-        print('no dogs added.')
+        # print('no dogs added.')
+        added_dogs_dict = None
     else:
         for dog in new_dogs:
             added_dogs_dict[dog] = new_dict[dog]
     if len(adopted_dogs) == 0:
-        print("no dogs adopted.")
+        # print("no dogs adopted.")
+        adopted_dogs_dict = None
     else:
         for dog in adopted_dogs:
             adopted_dogs_dict[dog] = old_dict[dog]
@@ -163,12 +165,45 @@ def close_connection(driver: WebDriverClass):
     time.sleep(1)
 
 
+def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
+    first_run = True
+    try:
+        while True:
+            curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
+            if first_run:
+                print('starting loop...')
+                print('detected {} dogs available'.format(len(curr_dict)))
+                dict_pretty_print(curr_dict)
+                first_run = False
+                old_dict = curr_dict
+                continue
+            curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
+            changes = compare_dicts(old_dict, curr_dict)
+            if verbose:
+                print('comparison says {}, continuing...'.format(changes))
+            if changes[0] is not None:
+                print('***** {} NEW DOGS ADDED!! *****'.format(len(changes[0])))
+                dict_pretty_print(changes[0])
+                print()
+            if changes[1] is not None:
+                print('***** {} dogs were adopted!! *****'.format(len(changes[1])))
+                dict_pretty_print(changes[1])
+            old_dict = curr_dict
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        print('quitting...')
+        return
+
+
 if __name__ == "__main__":
     TARGET_URL = 'http://dpsrescue.org/adopt/available/'
+    CHECK_INTERVAL = 120
 
     my_driver = open_connection(TARGET_URL, 'firefox')
-    lista = fetch_dogs_list(my_driver)
-    diz = dog_list_to_dict(lista)
-    dict_pretty_print(diz)
+    # lista = fetch_dogs_list(my_driver)
+    # diz = dog_list_to_dict(lista)
+    # dict_pretty_print(diz)
+    simple_loop(my_driver, CHECK_INTERVAL, False)
+    time.sleep(1)
     close_connection(my_driver)
     sys.exit(0)

@@ -139,13 +139,11 @@ def compare_dicts(old_dict: dict, new_dict: dict) -> tuple:
     added_dogs_dict = {}
     adopted_dogs_dict = {}
     if len(new_dogs) == 0:
-        # print('no dogs added.')
         added_dogs_dict = None
     else:
         for dog in new_dogs:
             added_dogs_dict[dog] = new_dict[dog]
     if len(adopted_dogs) == 0:
-        # print("no dogs adopted.")
         adopted_dogs_dict = None
     else:
         for dog in adopted_dogs:
@@ -166,6 +164,17 @@ def close_connection(driver: WebDriverClass):
 
 
 def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
+    """Dog list monitoring loop.
+
+    Parameters
+    ----------
+    driver : WebDriverClass
+        selenium webdriver instance
+    interval : float
+        Time interval for checking for updates in the dog list
+    verbose : bool, optional
+        Print additional info, by default False
+    """
     first_run = True
     try:
         while True:

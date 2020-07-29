@@ -171,8 +171,8 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
         while True:
             curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
             if first_run:
-                print('starting loop...')
-                print('detected {} dogs available'.format(len(curr_dict)))
+                print('\n\n\nstarting loop...')
+                print('detected {} dogs available\n'.format(len(curr_dict)))
                 dict_pretty_print(curr_dict)
                 first_run = False
                 old_dict = curr_dict
@@ -191,7 +191,7 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
             old_dict = curr_dict
             time.sleep(interval)
     except KeyboardInterrupt:
-        print('quitting...')
+        print('\nquitting...')
         return
 
 

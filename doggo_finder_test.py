@@ -15,6 +15,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
@@ -42,7 +43,10 @@ def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
         Raised if a wrong 'instance_type' argument is provided
     """
     if instance_type.lower() == 'firefox':
-        driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+        capabilities_argument = DesiredCapabilities().FIREFOX
+        capabilities_argument["marionette"] = True
+        driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(),
+            capabilities=capabilities_argument)
     elif instance_type.lower() == 'chrome':
         driver = webdriver.Chrome(executable_path=ChromeDriverManager().install())
     else:
@@ -166,6 +170,10 @@ def close_connection(driver: WebDriverClass):
     time.sleep(1)
 
 
+def print_refresh_report(changes: tuple, verbose: bool = False):
+    pass
+
+
 def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
     """Dog list monitoring loop.
 
@@ -211,7 +219,7 @@ if __name__ == "__main__":
     TARGET_URL = 'http://dpsrescue.org/adopt/available/'
     CHECK_INTERVAL = 120
 
-    my_driver = open_connection(TARGET_URL, 'firefox')
+    my_driver = open_connection(TARGET_URL, 'chrome')
     simple_loop(my_driver, CHECK_INTERVAL, False)
     time.sleep(1)
     close_connection(my_driver)

@@ -4,6 +4,9 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
+// TODO use colored text to highlight events
+// TODO put timestamps on each event reported
+
 """
 
 import time
@@ -209,9 +212,6 @@ if __name__ == "__main__":
     CHECK_INTERVAL = 120
 
     my_driver = open_connection(TARGET_URL, 'firefox')
-    # lista = fetch_dogs_list(my_driver)
-    # diz = dog_list_to_dict(lista)
-    # dict_pretty_print(diz)
     simple_loop(my_driver, CHECK_INTERVAL, False)
     time.sleep(1)
     close_connection(my_driver)

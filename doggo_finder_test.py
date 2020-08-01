@@ -16,6 +16,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+try:
+    from termcolor import cprint
+except ImportError:
+    print('\ntermcolor library not found, color output will not be available.\n')
 
 
 def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
@@ -170,11 +174,44 @@ def close_connection(driver: WebDriverClass):
     time.sleep(1)
 
 
-def print_refresh_report(changes: tuple, verbose: bool = False):
-    pass
+def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None):
+    """Print a somewhat formatted report of adopted/added dogs.
+
+    Parameters
+    ----------
+    changes : tuple
+        tuple containing the two changes dicts, or None if no changes for each
+        of the two categories (added dogs, adopted dogs)
+    verbose : bool, optional
+        [ NOT IMPLEMENTED ] print additional debug information, by default False
+    mode : str, optional
+        printed report mode, for now supports default print and colored print
+        (mode = "red"), by default None
+    """
+    if changes[0]:
+        if mode == 'color':
+            cprint('*' * 50, 'red')
+            cprint('*' * 10 + ' {} new dogs added!! '.format(len(changes[0])) + '*' * 10,
+                'red')
+            cprint('*' * 50, 'red')
+        else:
+            print('*' * 50)
+            print('*' * 10 + ' {} new dogs added!! '.format(len(changes[0])) + '*' * 10)
+            print('*' * 50)
+        dict_pretty_print(changes[0])
+        print()
+    if changes[1]:
+        if mode == 'color':
+            cprint('*' * 10 + ' {} new dogs adopted!! '.format(len(changes[1])) + '*' * 10,
+                'red')
+        else:
+            print('*' * 10 + ' {} new dogs adopted!! '.format(len(changes[1])) + '*' * 10)
+        dict_pretty_print(changes[1])
+        print()
 
 
-def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
+def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
+        print_mode: str = None):
     """Dog list monitoring loop.
 
     Parameters
@@ -185,6 +222,9 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
         Time interval for checking for updates in the dog list
     verbose : bool, optional
         Print additional info, by default False
+    print_mode : str, optional
+        printing mode for changes in the dogs listing (currently can be: "color"
+        for colored console output)
     """
     first_run = True
     try:
@@ -192,7 +232,10 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
             curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
             if first_run:
                 print('\n\n\nstarting loop...')
-                print('detected {} dogs available\n'.format(len(curr_dict)))
+                if print_mode == 'color':
+                    cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
+                else:
+                    print('detected {} dogs available\n'.format(len(curr_dict)))
                 dict_pretty_print(curr_dict)
                 first_run = False
                 old_dict = curr_dict
@@ -201,13 +244,7 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False):
             changes = compare_dicts(old_dict, curr_dict)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
-            if changes[0] is not None:
-                print('***** {} NEW DOGS ADDED!! *****'.format(len(changes[0])))
-                dict_pretty_print(changes[0])
-                print()
-            if changes[1] is not None:
-                print('***** {} dogs were adopted!! *****'.format(len(changes[1])))
-                dict_pretty_print(changes[1])
+            print_refresh_report(changes, mode=print_mode)
             old_dict = curr_dict
             time.sleep(interval)
     except KeyboardInterrupt:
@@ -220,7 +257,7 @@ if __name__ == "__main__":
     CHECK_INTERVAL = 120
 
     my_driver = open_connection(TARGET_URL, 'chrome')
-    simple_loop(my_driver, CHECK_INTERVAL, False)
+    simple_loop(my_driver, CHECK_INTERVAL, False, print_mode='color')
     time.sleep(1)
     close_connection(my_driver)
     sys.exit(0)

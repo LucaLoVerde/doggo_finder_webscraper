@@ -23,7 +23,7 @@ I'm using Python 3.8 with Anaconda. Dependencies so far are:
 * selenium (version 3.141.0) [Project homepage](https://github.com/SeleniumHQ/selenium/), [PyPI page](https://pypi.org/project/selenium/)
 * webdriver_manager (version 3.2.1) [Project homepage](https://github.com/SergeyPirogov/webdriver_manager), [PyPI page](https://pypi.org/project/webdriver-manager/)
 * A supported web browser (for now, works with Firefox and Chrome)
-* [ optional ] termcolor (version 1.1.0) [PyPI oage](https://pypi.org/project/termcolor/)
+* [ optional ] termcolor (version 1.1.0) [PyPI page](https://pypi.org/project/termcolor/)
 
 I'm mainly developing under Linux and Windows.
 

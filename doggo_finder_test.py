@@ -203,13 +203,11 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
             cprint('*' * 80, 'red')
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
             cprint('{} new dogs added!!'.format(len(changes[0])), 'red')
-            cprint('*' * 80, 'red')
             dict_pretty_print(changes[0], colored_gender=True)
         else:
             print('*' * 80)
             print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
             print('{} new dogs added!!'.format(len(changes[0])))
-            print('*' * 80)
             dict_pretty_print(changes[0])
         print()
     if changes[1]:

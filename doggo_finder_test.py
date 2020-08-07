@@ -4,9 +4,6 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
-// TODO use colored text to highlight events
-// TODO put timestamps on each event reported
-
 """
 
 import time
@@ -123,7 +120,8 @@ def dict_pretty_print(in_dict: dict, colored_gender: bool = False):
     in_dict : dict
         Input dogs dictionary
     colored_gender : bool
-        Print lines in blue for good boys and pink for good girls
+        Print lines in blue for good boys and pink for good girls (REQUIRES the
+        termcolor module installed)
     """
     for dog_name, attrs in in_dict.items():
         if colored_gender:
@@ -196,7 +194,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
         [ NOT IMPLEMENTED ] print additional debug information, by default False
     mode : str, optional
         printed report mode, for now supports default print and colored print
-        (mode = "red"), by default None
+        (mode = "color", REQUIRES the termcolor module installed), by default None
     """
     if verbose:
         pass
@@ -226,7 +224,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
 
 
 def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
-        print_mode: str = None):
+        color_print: str = None):
     """Dog list monitoring loop.
 
     Parameters
@@ -237,9 +235,9 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
         Time interval for checking for updates in the dog list
     verbose : bool, optional
         Print additional info, by default False
-    print_mode : str, optional
+    color_print : str, optional
         printing mode for changes in the dogs listing (currently can be: "color"
-        for colored console output)
+        for colored console output, REQUIRES the termcolor module installed)
     """
     first_run = True
     try:
@@ -247,7 +245,7 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
             curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
             if first_run:
                 print('\n\n\nstarting loop...')
-                if print_mode == 'color':
+                if color_print == 'color':
                     cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                         '%Y-%m-%d %H:%M:%S')), 'green')
                     cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
@@ -264,7 +262,7 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
             changes = compare_dicts(old_dict, curr_dict)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
-            print_refresh_report(changes, mode=print_mode)
+            print_refresh_report(changes, mode=color_print)
             old_dict = curr_dict
             time.sleep(interval)
     except KeyboardInterrupt:
@@ -277,7 +275,7 @@ if __name__ == "__main__":
     CHECK_INTERVAL = 120
 
     my_driver = open_connection(TARGET_URL, 'chrome')
-    simple_loop(my_driver, CHECK_INTERVAL, False, print_mode='color')
+    simple_loop(my_driver, CHECK_INTERVAL, False, color_print='color')
     time.sleep(1)
     close_connection(my_driver)
     sys.exit(0)

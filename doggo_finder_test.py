@@ -11,12 +11,12 @@ updates.
 
 import time
 import sys
+from datetime import datetime as dt
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from datetime import datetime as dt
 try:
     from termcolor import cprint
 except ImportError:
@@ -115,16 +115,25 @@ def dog_list_to_dict(in_list: list) -> dict:
     return dog_dict
 
 
-def dict_pretty_print(in_dict: dict):
+def dict_pretty_print(in_dict: dict, colored_gender: bool = False):
     """Print a report of dogs in dictionary.
 
     Parameters
     ----------
     in_dict : dict
         Input dogs dictionary
+    colored_gender : bool
+        Print lines in blue for good boys and pink for good girls
     """
     for dog_name, attrs in in_dict.items():
-        print("{}: {}, {}".format(dog_name, attrs[0], attrs[1]))
+        if colored_gender:
+            gender: str = attrs[1]
+            if 'Female' in gender:
+                cprint("{}: {}, {}".format(dog_name, attrs[0], attrs[1]), 'magenta')
+            elif 'Male' in gender:
+                cprint("{}: {}, {}".format(dog_name, attrs[0], attrs[1]), 'blue')
+        else:
+            print("{}: {}, {}".format(dog_name, attrs[0], attrs[1]))
 
 
 def compare_dicts(old_dict: dict, new_dict: dict) -> tuple:
@@ -197,20 +206,22 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
             cprint('{} new dogs added!!'.format(len(changes[0])), 'red')
             cprint('*' * 80, 'red')
+            dict_pretty_print(changes[0], colored_gender=True)
         else:
             print('*' * 80)
             print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
             print('{} new dogs added!!'.format(len(changes[0])))
             print('*' * 80)
-        dict_pretty_print(changes[0])
+            dict_pretty_print(changes[0])
         print()
     if changes[1]:
         if mode == 'color':
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
             cprint('{} new dogs adopted!!'.format(len(changes[1])), 'yellow')
+            dict_pretty_print(changes[1], colored_gender=True)
         else:
             print('{} new dogs adopted!!'.format(len(changes[1])))
-        dict_pretty_print(changes[1])
+            dict_pretty_print(changes[1])
         print()
 
 
@@ -237,8 +248,12 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
             if first_run:
                 print('\n\n\nstarting loop...')
                 if print_mode == 'color':
+                    cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
+                        '%Y-%m-%d %H:%M:%S')), 'green')
                     cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
                 else:
+                    print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
+                        '%Y-%m-%d %H:%M:%S')))
                     print('detected {} dogs available\n'.format(len(curr_dict)))
                 dict_pretty_print(curr_dict)
                 first_run = False

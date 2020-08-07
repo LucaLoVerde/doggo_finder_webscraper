@@ -251,11 +251,12 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
                     cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                         '%Y-%m-%d %H:%M:%S')), 'green')
                     cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
+                    dict_pretty_print(curr_dict, colored_gender=True)
                 else:
                     print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                         '%Y-%m-%d %H:%M:%S')))
                     print('detected {} dogs available\n'.format(len(curr_dict)))
-                dict_pretty_print(curr_dict)
+                    dict_pretty_print(curr_dict)
                 first_run = False
                 old_dict = curr_dict
                 continue

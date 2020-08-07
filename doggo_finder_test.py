@@ -16,6 +16,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from datetime import datetime as dt
 try:
     from termcolor import cprint
 except ImportError:
@@ -188,24 +189,27 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
         printed report mode, for now supports default print and colored print
         (mode = "red"), by default None
     """
+    if verbose:
+        pass
     if changes[0]:
         if mode == 'color':
-            cprint('*' * 50, 'red')
-            cprint('*' * 10 + ' {} new dogs added!! '.format(len(changes[0])) + '*' * 10,
-                'red')
-            cprint('*' * 50, 'red')
+            cprint('*' * 80, 'red')
+            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
+            cprint('{} new dogs added!!'.format(len(changes[0])), 'red')
+            cprint('*' * 80, 'red')
         else:
-            print('*' * 50)
-            print('*' * 10 + ' {} new dogs added!! '.format(len(changes[0])) + '*' * 10)
-            print('*' * 50)
+            print('*' * 80)
+            print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
+            print('{} new dogs added!!'.format(len(changes[0])))
+            print('*' * 80)
         dict_pretty_print(changes[0])
         print()
     if changes[1]:
         if mode == 'color':
-            cprint('*' * 10 + ' {} new dogs adopted!! '.format(len(changes[1])) + '*' * 10,
-                'red')
+            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
+            cprint('{} new dogs adopted!!'.format(len(changes[1])), 'yellow')
         else:
-            print('*' * 10 + ' {} new dogs adopted!! '.format(len(changes[1])) + '*' * 10)
+            print('{} new dogs adopted!!'.format(len(changes[1])))
         dict_pretty_print(changes[1])
         print()
 

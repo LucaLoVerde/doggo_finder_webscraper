@@ -229,7 +229,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
             dict_pretty_print(changes[1])
 
 
-def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
+def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: bool = False,
         color_print: str = None):
     """Dog list monitoring loop.
 
@@ -239,6 +239,8 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
         selenium webdriver instance
     interval : float
         Time interval for checking for updates in the dog list
+    cache : Cache
+        diskcache Cache object containing last session's dogs listing
     verbose : bool, optional
         Print additional info, by default False
     color_print : str, optional
@@ -251,16 +253,32 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
             curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
             if first_run:
                 print('\n\n\nstarting loop...')
-                if color_print == 'color':
-                    cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
-                        '%Y-%m-%d %H:%M:%S')), 'green')
-                    cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
-                    dict_pretty_print(curr_dict, colored_gender=True)
+                if 'data' in cache:
+                    cached_dict = cache['data']
+                    cached_time = cache['time']
+                    if color_print == 'color':
+                        cprint('found cache from {}'.format(cached_time), 'green')
+                        dict_pretty_print(cached_dict, colored_gender=True)
+                        curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
+                        changes = compare_dicts(cached_dict, curr_dict)
+                        print_refresh_report(changes, mode=color_print)
+                    else:
+                        print('found cache from {}'.format(cache['time']))
+                        dict_pretty_print(cached_dict, colored_gender=False)
+                        curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
+                        changes = compare_dicts(cached_dict, curr_dict)
+                        print_refresh_report(changes)
                 else:
-                    print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
-                        '%Y-%m-%d %H:%M:%S')))
-                    print('detected {} dogs available\n'.format(len(curr_dict)))
-                    dict_pretty_print(curr_dict)
+                    if color_print == 'color':
+                        cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
+                            '%Y-%m-%d %H:%M:%S')), 'green')
+                        cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
+                        dict_pretty_print(curr_dict, colored_gender=True)
+                    else:
+                        print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
+                            '%Y-%m-%d %H:%M:%S')))
+                        print('detected {} dogs available\n'.format(len(curr_dict)))
+                        dict_pretty_print(curr_dict)
                 first_run = False
                 old_dict = curr_dict
                 continue
@@ -272,16 +290,38 @@ def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,
             old_dict = curr_dict
             time.sleep(interval)
     except KeyboardInterrupt:
-        print('\nquitting...')
+        print('\nsaving cache...')
+        save_to_cache(cache, curr_dict)
+        print('quitting...')
         return
+
+
+def load_cache(path: str, verbose: bool = False) -> Cache:
+    cache = Cache(directory=path)
+    if verbose:
+        if 'data' in cache:
+            print('found cached data from {}'.format(cache['time']))
+            print('{} dogs in cache'.format(len(cache['data'])))
+        else:
+            print('no cached data found.')
+    return cache
+
+
+def save_to_cache(cache: Cache, data: dict):
+    cache['data'] = data
+    cache['time'] = dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')
+    cache.close()
 
 
 if __name__ == "__main__":
     TARGET_URL = 'http://dpsrescue.org/adopt/available/'
     CHECK_INTERVAL = 120
+    CACHE_PATH = 'cache'
 
     my_driver = open_connection(TARGET_URL, 'chrome')
-    simple_loop(my_driver, CHECK_INTERVAL, False, color_print='color')
+    my_cache = load_cache(CACHE_PATH, True)
+    simple_loop(driver=my_driver, interval=CHECK_INTERVAL, cache=my_cache,
+        verbose=False, color_print='color')
     time.sleep(1)
     close_connection(my_driver)
     sys.exit(0)

@@ -257,13 +257,15 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                     cached_dict = cache['data']
                     cached_time = cache['time']
                     if color_print == 'color':
-                        cprint('found cache from {}'.format(cached_time), 'green')
+                        cprint('found cache from {} with {} available dogs'.format(
+                            cached_time, len(cached_dict)), 'green')
                         dict_pretty_print(cached_dict, colored_gender=True)
                         curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
                         changes = compare_dicts(cached_dict, curr_dict)
                         print_refresh_report(changes, mode=color_print)
                     else:
-                        print('found cache from {}'.format(cache['time']))
+                        print('found cache from {} with {} available dogs'.format(
+                            cached_time, len(cached_dict)))
                         dict_pretty_print(cached_dict, colored_gender=False)
                         curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
                         changes = compare_dicts(cached_dict, curr_dict)
@@ -319,7 +321,7 @@ if __name__ == "__main__":
     CACHE_PATH = 'cache'
 
     my_driver = open_connection(TARGET_URL, 'chrome')
-    my_cache = load_cache(CACHE_PATH, True)
+    my_cache = load_cache(path=CACHE_PATH, verbose=False)
     simple_loop(driver=my_driver, interval=CHECK_INTERVAL, cache=my_cache,
         verbose=False, color_print='color')
     time.sleep(1)

@@ -1,5 +1,4 @@
-geckodriver.log
-.vscode/settings.json
-ghostdriver.log
-debug.log
+.vscode/
+*.log
 doggo_finder_workspace.code-workspace
+cache/

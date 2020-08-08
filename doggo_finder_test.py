@@ -12,6 +12,7 @@ updates.
 import time
 import sys
 from datetime import datetime as dt
+from diskcache import Cache
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver

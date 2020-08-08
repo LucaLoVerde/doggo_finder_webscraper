@@ -205,6 +205,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
     if verbose:
         pass
     if changes[0]:
+        print()
         if mode == 'color':
             cprint('*' * 80, 'red')
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
@@ -215,8 +216,8 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
             print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
             print('{} new dogs added!!'.format(len(changes[0])))
             dict_pretty_print(changes[0])
-        print()
     if changes[1]:
+        print()
         if mode == 'color':
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
             cprint('{} new dogs adopted!!'.format(len(changes[1])), 'yellow')
@@ -224,7 +225,6 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
         else:
             print('{} new dogs adopted!!'.format(len(changes[1])))
             dict_pretty_print(changes[1])
-        print()
 
 
 def simple_loop(driver: WebDriverClass, interval: float, verbose: bool = False,

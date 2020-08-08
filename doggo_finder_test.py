@@ -4,6 +4,7 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
+// TODO report current number after every change event
 // TODO cache function with DiskCache?
 
 """
@@ -209,21 +210,21 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
         if mode == 'color':
             cprint('*' * 80, 'red')
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
-            cprint('{} new dogs added!!'.format(len(changes[0])), 'red')
+            cprint('{} new dog(s) added!!'.format(len(changes[0])), 'red')
             dict_pretty_print(changes[0], colored_gender=True)
         else:
             print('*' * 80)
             print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
-            print('{} new dogs added!!'.format(len(changes[0])))
+            print('{} new dog(s) added!!'.format(len(changes[0])))
             dict_pretty_print(changes[0])
     if changes[1]:
         print()
         if mode == 'color':
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
-            cprint('{} new dogs adopted!!'.format(len(changes[1])), 'yellow')
+            cprint('{} new dog(s) adopted!!'.format(len(changes[1])), 'yellow')
             dict_pretty_print(changes[1], colored_gender=True)
         else:
-            print('{} new dogs adopted!!'.format(len(changes[1])))
+            print('{} new dog(s) adopted!!'.format(len(changes[1])))
             dict_pretty_print(changes[1])
 
 

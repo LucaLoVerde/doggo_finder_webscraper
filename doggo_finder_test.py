@@ -4,6 +4,8 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
+// TODO cache function with DiskCache?
+
 """
 
 import time

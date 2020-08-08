@@ -25,7 +25,6 @@ def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
 
     Creates and returns a selenium webdriver object after initializing and
     getting the webpage passed as argument.
-    // TODO support different browsers/webdrivers?
 
     Parameters
     ----------
@@ -135,21 +134,26 @@ def dict_pretty_print(in_dict: dict, colored_gender: bool = False):
 
 
 def compare_dicts(old_dict: dict, new_dict: dict) -> tuple:
-    """[summary].
+    """Compare dogs dicts for additions/adoptions.
 
-    // TODO docs
+    Compares two dogs dictionaries to find new additions and adoptions, then
+    it returns a tuple containing two elements, the first element representing
+    additions and the second representing adoptions. These elements will be None
+    if there are no additions/adoptions, or dictionaries containing the dogs that
+    were added/adopted, respectively.
 
     Parameters
     ----------
     old_dict : dict
-        [description]
+        Original dictionary to compare to new one
     new_dict : dict
-        [description]
+        New dictionary to compare to original
 
     Returns
     -------
     tuple
-        [description]
+        Tuple of length 2 containing changes for each category (either None or a
+        changes dictionary for each element)
     """
     old_keys = set(old_dict.keys())
     new_keys = set(new_dict.keys())

@@ -164,6 +164,11 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     return dog_df
 
 
+def df_pretty_print(in_df: pd.DataFrame, colored_gender: bool = False):
+    # // TODO base it on strings produced by tabulate(), then post-processed to include colored text based on gender
+    pass
+
+
 def dict_pretty_print(in_dict: dict, colored_gender: bool = False):
     """Print a report of dogs in dictionary.
 

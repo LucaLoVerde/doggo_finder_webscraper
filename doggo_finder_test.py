@@ -5,7 +5,6 @@ from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
 // TODO report current number after every change event
-// TODO cache function with DiskCache?
 
 """
 
@@ -190,7 +189,7 @@ def close_connection(driver: WebDriverClass):
     time.sleep(1)
 
 
-def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None):
+def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None) -> bool:
     """Print a somewhat formatted report of adopted/added dogs.
 
     Parameters
@@ -227,6 +226,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
         else:
             print('{} new dog(s) adopted!!'.format(len(changes[1])))
             dict_pretty_print(changes[1])
+    return any(changes)
 
 
 def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: bool = False,
@@ -288,7 +288,12 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
             changes = compare_dicts(old_dict, curr_dict)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
-            print_refresh_report(changes, mode=color_print)
+            changed = print_refresh_report(changes, mode=color_print)
+            if changed:
+                if color_print == 'color':
+                    cprint('Available dogs: {}'.format(len(curr_dict)), 'green')
+                else:
+                    print('Available dogs: {}'.format(len(curr_dict)))
             old_dict = curr_dict
             time.sleep(interval)
     except KeyboardInterrupt:

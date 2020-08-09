@@ -12,13 +12,14 @@ import sys
 from datetime import datetime as dt
 import pandas as pd
 from diskcache import Cache
+from tabulate import tabulate
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 try:
-    from termcolor import cprint
+    from termcolor import cprint, colored
 except ImportError:
     print('\ntermcolor library not found, color output will not be available.\n')
 
@@ -93,7 +94,7 @@ def dog_list_to_dict(in_list: list) -> dict:
     For now, we split each element with newline as separator, then we use each
     first element (dog's name) as a key in the returned dictionary, where the
     rest of the elements (a string containing the breed and another containing
-    the age and gender of the dog).
+    the age and sex of the dog).
     // TODO maybe create a class for containing the dogs' information?
 
     Parameters
@@ -105,7 +106,7 @@ def dog_list_to_dict(in_list: list) -> dict:
     -------
     dict
         Dictionary where keys are each dog's names and values are lists with the
-        breed and age/gender of the dogs
+        breed and age/sex of the dogs
     """
     dog_dict = {}
     for dog in in_list:
@@ -139,53 +140,71 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     names = []
     breeds = []
     ages = []
-    genders = []
+    sexes = []
     for dog in in_list:
         tmp_sublist = dog.split('\n')
         names.append(tmp_sublist[0])
         breeds.append(tmp_sublist[1])
         tmp2_sublist = tmp_sublist[2].split('-')
-        assert len(tmp2_sublist) <= 3, "Format for dog age/gender changed?"
+        assert len(tmp2_sublist) <= 3, "Format for dog age/sex changed?"
         if len(tmp2_sublist) == 2:
             ages.append(tmp2_sublist[0].strip())
-            tmp_gender = tmp2_sublist[1].strip()
+            tmp_sex = tmp2_sublist[1].strip()
         elif len(tmp2_sublist) == 3:
             tmp_age = [el.strip() for el in tmp2_sublist[:2]]
             ages.append('-'.join(tmp_age))
-        if 'Female' in tmp_gender:
-            genders.append('F')
-        elif 'Male' in tmp_gender:
-            genders.append('M')
+        if 'Female' in tmp_sex:
+            sexes.append('F')
+        elif 'Male' in tmp_sex:
+            sexes.append('M')
         else:
-            raise TypeError("Cannot parse {}'s gender".format(names[-1]))
+            raise TypeError("Cannot parse {}'s sex".format(names[-1]))
     dog_df = pd.DataFrame({'name': names, 'breed': breeds, 'age': ages,
-        'gender': genders})
-    dog_df['gender'] = dog_df['gender'].astype('category')
+        'sex': sexes})
+    dog_df['sex'] = dog_df['sex'].astype('category')
     return dog_df
 
 
-def df_pretty_print(in_df: pd.DataFrame, colored_gender: bool = False):
-    # // TODO base it on strings produced by tabulate(), then post-processed to include colored text based on gender
-    pass
+def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False):
+    """Printing function for dogs listing DataFrames.
+
+    Parameters
+    ----------
+    in_df : pd.DataFrame
+        [description]
+    colored_sex : bool, optional
+        [description], by default False
+    """
+    tabulated = tabulate(in_df, headers=['idx', 'name', 'breed', 'age', 'sex'])
+    if colored_sex:
+        tabulated = tabulated.replace(
+            ' M\n', ' ' + colored('M', 'blue') + '\n').replace(
+            ' F\n', ' ' + colored('F', 'magenta') + '\n')
+        if tabulated[-1] == 'F':
+            colors_str = colored('-', 'magenta').split('-')
+        else:
+            colors_str = colored('-', 'blue').split('-')
+        tabulated = tabulated[:-1] + colors_str[0] + tabulated[-1:] + colors_str[1]
+    print(tabulated)
 
 
-def dict_pretty_print(in_dict: dict, colored_gender: bool = False):
+def dict_pretty_print(in_dict: dict, colored_sex: bool = False):
     """Print a report of dogs in dictionary.
 
     Parameters
     ----------
     in_dict : dict
         Input dogs dictionary
-    colored_gender : bool
+    colored_sex : bool
         Print lines in blue for good boys and pink for good girls (REQUIRES the
         termcolor module installed)
     """
     for dog_name, attrs in in_dict.items():
-        if colored_gender:
-            gender: str = attrs[1]
-            if 'Female' in gender:
+        if colored_sex:
+            sex: str = attrs[1]
+            if 'Female' in sex:
                 cprint("{}: {}, {}".format(dog_name, attrs[0], attrs[1]), 'magenta')
-            elif 'Male' in gender:
+            elif 'Male' in sex:
                 cprint("{}: {}, {}".format(dog_name, attrs[0], attrs[1]), 'blue')
         else:
             print("{}: {}, {}".format(dog_name, attrs[0], attrs[1]))
@@ -270,7 +289,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
             cprint('*' * 80, 'red')
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
             cprint('{} new dog(s) added!!'.format(len(changes[0])), 'red')
-            dict_pretty_print(changes[0], colored_gender=True)
+            dict_pretty_print(changes[0], colored_sex=True)
         else:
             print('*' * 80)
             print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
@@ -281,7 +300,7 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
         if mode == 'color':
             cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
             cprint('{} new dog(s) adopted!!'.format(len(changes[1])), 'yellow')
-            dict_pretty_print(changes[1], colored_gender=True)
+            dict_pretty_print(changes[1], colored_sex=True)
         else:
             print('{} new dog(s) adopted!!'.format(len(changes[1])))
             dict_pretty_print(changes[1])
@@ -323,14 +342,14 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                     if color_print == 'color':
                         cprint('found cache from {} with {} available dogs'.format(
                             cached_time, len(cached_dict)), 'green')
-                        dict_pretty_print(cached_dict, colored_gender=True)
+                        dict_pretty_print(cached_dict, colored_sex=True)
                         curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
                         changes = compare_dicts(cached_dict, curr_dict)
                         print_refresh_report(changes, mode=color_print)
                     else:
                         print('found cache from {} with {} available dogs'.format(
                             cached_time, len(cached_dict)))
-                        dict_pretty_print(cached_dict, colored_gender=False)
+                        dict_pretty_print(cached_dict, colored_sex=False)
                         curr_dict = dog_list_to_dict(fetch_dogs_list(driver))
                         changes = compare_dicts(cached_dict, curr_dict)
                         print_refresh_report(changes)
@@ -339,7 +358,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                             '%Y-%m-%d %H:%M:%S')), 'green')
                         cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
-                        dict_pretty_print(curr_dict, colored_gender=True)
+                        dict_pretty_print(curr_dict, colored_sex=True)
                     else:
                         print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                             '%Y-%m-%d %H:%M:%S')))

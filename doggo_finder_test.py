@@ -114,6 +114,56 @@ def dog_list_to_dict(in_list: list) -> dict:
     return dog_dict
 
 
+def dog_list_to_df(in_list: list) -> pd.DataFrame:
+    """Convert available dog list to pandas DataFrame.
+
+    // TODO docs
+
+    Parameters
+    ----------
+    in_list : list
+        [description]
+
+    Returns
+    -------
+    pd.DataFrame
+        [description]
+
+    Raises
+    ------
+    TypeError
+        [description]
+    AssertionError
+        [description]
+    """
+    names = []
+    breeds = []
+    ages = []
+    genders = []
+    for dog in in_list:
+        tmp_sublist = dog.split('\n')
+        names.append(tmp_sublist[0])
+        breeds.append(tmp_sublist[1])
+        tmp2_sublist = tmp_sublist[2].split('-')
+        assert len(tmp2_sublist) <= 3, "Format for dog age/gender changed?"
+        if len(tmp2_sublist) == 2:
+            ages.append(tmp2_sublist[0].strip())
+            tmp_gender = tmp2_sublist[1].strip()
+        elif len(tmp2_sublist) == 3:
+            tmp_age = [el.strip() for el in tmp2_sublist[:2]]
+            ages.append('-'.join(tmp_age))
+        if 'Female' in tmp_gender:
+            genders.append('F')
+        elif 'Male' in tmp_gender:
+            genders.append('M')
+        else:
+            raise TypeError("Cannot parse {}'s gender".format(names[-1]))
+    dog_df = pd.DataFrame({'name': names, 'breed': breeds, 'age': ages,
+        'gender': genders})
+    dog_df['gender'] = dog_df['gender'].astype('category')
+    return dog_df
+
+
 def dict_pretty_print(in_dict: dict, colored_gender: bool = False):
     """Print a report of dogs in dictionary.
 

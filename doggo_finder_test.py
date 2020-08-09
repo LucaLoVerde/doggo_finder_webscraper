@@ -4,7 +4,6 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
-// TODO report current number after every change event
 
 """
 
@@ -202,6 +201,10 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
     mode : str, optional
         printed report mode, for now supports default print and colored print
         (mode = "color", REQUIRES the termcolor module installed), by default None
+    Returns
+    -------
+    bool
+        True if dogs were added or adopted
     """
     if verbose:
         pass
@@ -232,6 +235,11 @@ def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None
 def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: bool = False,
         color_print: str = None):
     """Dog list monitoring loop.
+
+    Heavy lifting of the update checking loop. On first run, it checks the cache,
+    then fetches and reports the current listing (and any changes compared to the
+    cached data), then waits for the specified interval and then print any new
+    changes detected.
 
     Parameters
     ----------
@@ -304,6 +312,23 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
 
 
 def load_cache(path: str, verbose: bool = False) -> Cache:
+    """Load cached data from disk, or create new cache.
+
+    Loads an existing cache from disk from the specified path. Initializes a new
+    cache at that path if none exists.
+
+    Parameters
+    ----------
+    path : str
+        Path to the cache folder
+    verbose : bool, optional
+        Print additional debug info, by default False
+
+    Returns
+    -------
+    Cache
+        Cache object ready for use.
+    """
     cache = Cache(directory=path)
     if verbose:
         if 'data' in cache:
@@ -315,6 +340,18 @@ def load_cache(path: str, verbose: bool = False) -> Cache:
 
 
 def save_to_cache(cache: Cache, data: dict):
+    """Save dogs listing in persistent cache.
+
+    Saves a diskcache Cache instance on disk. The available dogs dictionary is
+    saved ('data' key) together with a timestamp ('time' key).
+
+    Parameters
+    ----------
+    cache : Cache
+        Cache object containing the dogs listing info.
+    data : dict
+        Dogs listing dictionary to cache for future use.
+    """
     cache['data'] = data
     cache['time'] = dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')
     cache.close()
@@ -322,8 +359,8 @@ def save_to_cache(cache: Cache, data: dict):
 
 if __name__ == "__main__":
     TARGET_URL = 'http://dpsrescue.org/adopt/available/'
-    CHECK_INTERVAL = 120
-    CACHE_PATH = 'cache'
+    CHECK_INTERVAL = 120  # check every 120 s
+    CACHE_PATH = 'cache'  # for now, 'cache' subfolder in current dif
 
     my_driver = open_connection(TARGET_URL, 'chrome')
     my_cache = load_cache(path=CACHE_PATH, verbose=False)

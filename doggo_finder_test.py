@@ -316,13 +316,14 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         print('Available dogs: {}'.format(len(curr_df)))
                 else:
                     if color_print == 'color':
-                        cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
-                            '%Y-%m-%d %H:%M:%S')), 'green')
-                        cprint('detected {} dogs available\n'.format(len(curr_df)), 'green')
+                        cprint('monitoring loop started: {}'.format(dt.strftime(
+                            dt.now(), '%Y-%m-%d %H:%M:%S')), 'green')
+                        cprint('detected {} dogs available\n'.format(len(curr_df)),
+                            'green')
                         df_pretty_print(curr_df, colored_sex=True)
                     else:
-                        print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
-                            '%Y-%m-%d %H:%M:%S')))
+                        print('monitoring loop started: {}'.format(dt.strftime(
+                            dt.now(), '%Y-%m-%d %H:%M:%S')))
                         print('detected {} dogs available\n'.format(len(curr_df)))
                         df_pretty_print(curr_df)
                 first_run = False

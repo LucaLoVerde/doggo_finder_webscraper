@@ -4,6 +4,9 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
+// TODO should reprint the whole list after a second, longer interval
+// TODO handle screen cleaning at startup/on periodic list reprinting?
+
 
 """
 

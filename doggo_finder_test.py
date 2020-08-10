@@ -305,6 +305,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         curr_df = dog_list_to_df(fetch_dogs_list(driver))
                         changes = compare_dfs(cached_df, curr_df)
                         print_refresh_report_df(changes, mode=color_print)
+                        cprint('Available dogs: {}'.format(len(curr_df)), 'green')
                     else:
                         print('found cache from {} with {} available dogs'.format(
                             cached_time, len(cached_df)))
@@ -312,6 +313,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         curr_df = dog_list_to_df(fetch_dogs_list(driver))
                         changes = compare_dfs(cached_df, curr_df)
                         print_refresh_report_df(changes)
+                        print('Available dogs: {}'.format(len(curr_df)))
                 else:
                     if color_print == 'color':
                         cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),

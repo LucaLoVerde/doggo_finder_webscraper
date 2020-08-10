@@ -232,6 +232,50 @@ def compare_dfs(old_df: pd.DataFrame, new_df: pd.DataFrame) -> Tuple[Optional[pd
     return (new_dogs_df, adopted_dogs_df)
 
 
+def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = None) -> bool:
+    """Print a somewhat formatted report of adopted/added dogs (dataframe).
+
+    Parameters
+    ----------
+    changes : tuple
+        tuple containing the two changes dicts, or None if no changes for each
+        of the two categories (added dogs, adopted dogs)
+    verbose : bool, optional
+        [ NOT IMPLEMENTED ] print additional debug information, by default False
+    mode : str, optional
+        printed report mode, for now supports default print and colored print
+        (mode = "color", REQUIRES the termcolor module installed), by default None
+    Returns
+    -------
+    bool
+        True if dogs were added or adopted
+    """
+    if verbose:
+        pass
+    if changes[0] is not None:
+        print()
+        if mode == 'color':
+            cprint('*' * 80, 'red')
+            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
+            cprint('{} new dog(s) added!!'.format(len(changes[0])), 'red')
+            df_pretty_print(changes[0], colored_sex=True)
+        else:
+            print('*' * 80)
+            print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
+            print('{} new dog(s) added!!'.format(len(changes[0])))
+            df_pretty_print(changes[0])
+    if changes[1] is not None:
+        print()
+        if mode == 'color':
+            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
+            cprint('{} new dog(s) adopted!!'.format(len(changes[1])), 'yellow')
+            df_pretty_print(changes[1], colored_sex=True)
+        else:
+            print('{} new dog(s) adopted!!'.format(len(changes[1])))
+            df_pretty_print(changes[1])
+    return any([any(df.any()) for df in changes])
+
+
 def dict_pretty_print(in_dict: dict, colored_sex: bool = False):
     """Print a report of dogs in dictionary.
 

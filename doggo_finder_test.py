@@ -19,10 +19,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-try:
-    from termcolor import cprint, colored
-except ImportError:
-    print('\ntermcolor library not found, color output will not be available.\n')
+from termcolor import cprint, colored
 
 
 def open_connection(target_url: str, instance_type: str) -> WebDriverClass:

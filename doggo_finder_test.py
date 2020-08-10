@@ -251,7 +251,6 @@ def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = N
         else:
             print('{} new dog(s) adopted!!'.format(len(changes[1])))
             df_pretty_print(changes[1])
-    # return any([any(df.any()) for df in changes])
     return (changes[0] is not None) or (changes[1] is not None)
 
 
@@ -292,8 +291,8 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
     """
     first_run = True
     try:
+        curr_df = dog_list_to_df(fetch_dogs_list(driver))
         while True:
-            curr_df = dog_list_to_df(fetch_dogs_list(driver))
             if first_run:
                 print('\n\n\nstarting loop...')
                 if 'data' in cache:
@@ -306,7 +305,6 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         curr_df = dog_list_to_df(fetch_dogs_list(driver))
                         changes = compare_dfs(cached_df, curr_df)
                         print_refresh_report_df(changes, mode=color_print)
-                        cprint('Available dogs: {}'.format(len(curr_df)), 'green')
                     else:
                         print('found cache from {} with {} available dogs'.format(
                             cached_time, len(cached_df)))
@@ -314,7 +312,6 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         curr_df = dog_list_to_df(fetch_dogs_list(driver))
                         changes = compare_dfs(cached_df, curr_df)
                         print_refresh_report_df(changes)
-                        print('Available dogs: {}'.format(len(curr_df)))
                 else:
                     if color_print == 'color':
                         cprint('monitoring loop started: {}'.format(dt.strftime(

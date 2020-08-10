@@ -24,7 +24,9 @@ I'm using Python 3.8 with Anaconda. Dependencies so far are:
 * `selenium` (version 3.141.0) [Project homepage](https://github.com/SeleniumHQ/selenium/), [PyPI page](https://pypi.org/project/selenium/)
 * `webdriver_manager` (version 3.2.1) [Project homepage](https://github.com/SergeyPirogov/webdriver_manager), [PyPI page](https://pypi.org/project/webdriver-manager/)
 * `diskcache` (version 4.1.0) [PyPI page](https://pypi.org/project/diskcache/)
-* [ optional ] `termcolor` (version 1.1.0) [PyPI page](https://pypi.org/project/termcolor/)
+* `pandas` (version 1.0.5) [PyPI page](https://pypi.org/project/pandas/) [docs](https://pandas.pydata.org/docs/) (since I wanted to get into it, I'm using dataframes as data structures for the dogs listings...)
+* `tabulate` (version 0.8.3) [PyPI page](https://pypi.org/project/tabulate/)
+* `termcolor` (version 1.1.0) [PyPI page](https://pypi.org/project/termcolor/)
 
 I'm mainly developing under Linux and Windows.
 

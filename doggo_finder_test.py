@@ -89,24 +89,27 @@ def fetch_dogs_list(driver: WebDriverClass) -> list:
 def dog_list_to_df(in_list: list) -> pd.DataFrame:
     """Convert available dog list to pandas DataFrame.
 
-    // TODO docs
+    Converts a list of dogs available for adoption (as returned by
+    fetch_dogs_list()) to a pandas DataFrame with the name of each dog used as
+    index and a breed, age and sex columns.
 
     Parameters
     ----------
     in_list : list
-        [description]
+        List of available dogs, as returned by fetch_dogs_list()
 
     Returns
     -------
     pd.DataFrame
-        [description]
+        pandas DataFrame containing the dogs available for adoption
 
     Raises
     ------
     TypeError
-        [description]
+        Parsing error for dog gender
     AssertionError
-        [description]
+        They probably changed the way they format the info, screwing up my way
+        of separating each bit of info during parsing.
     """
     names = []
     breeds = []

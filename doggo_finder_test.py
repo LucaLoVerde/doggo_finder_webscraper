@@ -162,6 +162,7 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     dog_df = pd.DataFrame({'name': names, 'breed': breeds, 'age': ages,
         'sex': sexes})
     dog_df['sex'] = dog_df['sex'].astype('category')
+    dog_df = dog_df.set_index('name')
     return dog_df
 
 

@@ -10,6 +10,7 @@ updates.
 import time
 import sys
 from datetime import datetime as dt
+from typing import Union, Tuple, Optional
 import pandas as pd
 from diskcache import Cache
 from tabulate import tabulate
@@ -195,6 +196,40 @@ def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False,
         if tabulated[-1] in ['M', 'F']:
             tabulated = tabulated[:-1] + colors_str[0] + tabulated[-1:] + colors_str[1]
     print(tabulated)
+
+
+def compare_dfs(old_df: pd.DataFrame, new_df: pd.DataFrame) -> Tuple[Optional[pd.DataFrame]]:
+    """Compare dogs dataframes for additions/adoptions.
+
+    Parameters
+    ----------
+    old_df : pd.DataFrame
+        [description]
+    new_df : pd.DataFrame
+        [description]
+
+    Returns
+    -------
+    Tuple[Optional[pd.DataFrame]]
+        [description]
+    """
+    old_keys = set(old_df.index)
+    new_keys = set(new_df.index)
+    new_dogs = new_keys.difference(old_keys)
+    adopted_dogs = old_keys.difference(new_keys)
+    if len(new_dogs) == 0:
+        new_dogs_df = None
+    else:
+        new_dogs_df = pd.DataFrame(columns=old_df.columns)
+        for key in new_dogs:
+            new_dogs_df = new_dogs_df.append(new_df.loc[str(key)])
+    if len(adopted_dogs) == 0:
+        adopted_dogs_df = None
+    else:
+        adopted_dogs_df = pd.DataFrame(columns=old_df.columns)
+        for key in adopted_dogs:
+            adopted_dogs_df = adopted_dogs_df.append(old_df.loc[str(key)])
+    return (new_dogs_df, adopted_dogs_df)
 
 
 def dict_pretty_print(in_dict: dict, colored_sex: bool = False):

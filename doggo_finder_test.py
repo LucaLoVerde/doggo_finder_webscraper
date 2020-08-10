@@ -165,8 +165,9 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     return dog_df
 
 
-def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False):
-    """Printing function for dogs listing DataFrames.
+def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False,
+        header: bool = False):
+    """Print dogs listing DataFrames.
 
     Parameters
     ----------
@@ -174,8 +175,14 @@ def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False):
         [description]
     colored_sex : bool, optional
         [description], by default False
+    header : bool, optional
+        [description], by default False
     """
-    tabulated = tabulate(in_df, headers=['idx', 'name', 'breed', 'age', 'sex'])
+    if header:
+        cols = ['idx'] + list(in_df.columns)
+    else:
+        cols = []
+    tabulated = tabulate(in_df, headers=cols)
     if colored_sex:
         tabulated = tabulated.replace(
             ' M\n', ' ' + colored('M', 'blue') + '\n').replace(
@@ -184,7 +191,8 @@ def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False):
             colors_str = colored('-', 'magenta').split('-')
         else:
             colors_str = colored('-', 'blue').split('-')
-        tabulated = tabulated[:-1] + colors_str[0] + tabulated[-1:] + colors_str[1]
+        if tabulated[-1] in ['M', 'F']:
+            tabulated = tabulated[:-1] + colors_str[0] + tabulated[-1:] + colors_str[1]
     print(tabulated)
 
 

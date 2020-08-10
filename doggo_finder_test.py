@@ -6,6 +6,7 @@ updates.
 
 // TODO should reprint the whole list after a second, longer interval
 // TODO handle screen cleaning at startup/on periodic list reprinting?
+// TODO timestamp each dog's addition to the list?
 
 
 """

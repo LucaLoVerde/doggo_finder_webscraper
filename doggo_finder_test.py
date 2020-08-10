@@ -89,33 +89,6 @@ def fetch_dogs_list(driver: WebDriverClass) -> list:
     return dog_list
 
 
-def dog_list_to_dict(in_list: list) -> dict:
-    """Convert dog list to dictionary.
-
-    For now, we split each element with newline as separator, then we use each
-    first element (dog's name) as a key in the returned dictionary, where the
-    rest of the elements (a string containing the breed and another containing
-    the age and sex of the dog).
-    // TODO maybe create a class for containing the dogs' information?
-
-    Parameters
-    ----------
-    in_list : list
-        Dog list as extracted from the rescue web page
-
-    Returns
-    -------
-    dict
-        Dictionary where keys are each dog's names and values are lists with the
-        breed and age/sex of the dogs
-    """
-    dog_dict = {}
-    for dog in in_list:
-        tmp_sublist = dog.split('\n')
-        dog_dict[tmp_sublist[0]] = tmp_sublist[1:]
-    return dog_dict
-
-
 def dog_list_to_df(in_list: list) -> pd.DataFrame:
     """Convert available dog list to pandas DataFrame.
 
@@ -278,69 +251,6 @@ def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = N
     return (changes[0] is not None) or (changes[1] is not None)
 
 
-def dict_pretty_print(in_dict: dict, colored_sex: bool = False):
-    """Print a report of dogs in dictionary.
-
-    Parameters
-    ----------
-    in_dict : dict
-        Input dogs dictionary
-    colored_sex : bool
-        Print lines in blue for good boys and pink for good girls (REQUIRES the
-        termcolor module installed)
-    """
-    for dog_name, attrs in in_dict.items():
-        if colored_sex:
-            sex: str = attrs[1]
-            if 'Female' in sex:
-                cprint("{}: {}, {}".format(dog_name, attrs[0], attrs[1]), 'magenta')
-            elif 'Male' in sex:
-                cprint("{}: {}, {}".format(dog_name, attrs[0], attrs[1]), 'blue')
-        else:
-            print("{}: {}, {}".format(dog_name, attrs[0], attrs[1]))
-
-
-def compare_dicts(old_dict: dict, new_dict: dict) -> tuple:
-    """Compare dogs dicts for additions/adoptions.
-
-    Compares two dogs dictionaries to find new additions and adoptions, then
-    it returns a tuple containing two elements, the first element representing
-    additions and the second representing adoptions. These elements will be None
-    if there are no additions/adoptions, or dictionaries containing the dogs that
-    were added/adopted, respectively.
-
-    Parameters
-    ----------
-    old_dict : dict
-        Original dictionary to compare to new one
-    new_dict : dict
-        New dictionary to compare to original
-
-    Returns
-    -------
-    tuple
-        Tuple of length 2 containing changes for each category (either None or a
-        changes dictionary for each element)
-    """
-    old_keys = set(old_dict.keys())
-    new_keys = set(new_dict.keys())
-    new_dogs = new_keys.difference(old_keys)
-    adopted_dogs = old_keys.difference(new_keys)
-    added_dogs_dict = {}
-    adopted_dogs_dict = {}
-    if len(new_dogs) == 0:
-        added_dogs_dict = None
-    else:
-        for dog in new_dogs:
-            added_dogs_dict[dog] = new_dict[dog]
-    if len(adopted_dogs) == 0:
-        adopted_dogs_dict = None
-    else:
-        for dog in adopted_dogs:
-            adopted_dogs_dict[dog] = old_dict[dog]
-    return (added_dogs_dict, adopted_dogs_dict)
-
-
 def close_connection(driver: WebDriverClass):
     """Close webdriver instance.
 
@@ -351,50 +261,6 @@ def close_connection(driver: WebDriverClass):
     """
     driver.quit()
     time.sleep(1)
-
-
-def print_refresh_report(changes: tuple, verbose: bool = False, mode: str = None) -> bool:
-    """Print a somewhat formatted report of adopted/added dogs.
-
-    Parameters
-    ----------
-    changes : tuple
-        tuple containing the two changes dicts, or None if no changes for each
-        of the two categories (added dogs, adopted dogs)
-    verbose : bool, optional
-        [ NOT IMPLEMENTED ] print additional debug information, by default False
-    mode : str, optional
-        printed report mode, for now supports default print and colored print
-        (mode = "color", REQUIRES the termcolor module installed), by default None
-    Returns
-    -------
-    bool
-        True if dogs were added or adopted
-    """
-    if verbose:
-        pass
-    if changes[0]:
-        print()
-        if mode == 'color':
-            cprint('*' * 80, 'red')
-            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
-            cprint('{} new dog(s) added!!'.format(len(changes[0])), 'red')
-            dict_pretty_print(changes[0], colored_sex=True)
-        else:
-            print('*' * 80)
-            print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
-            print('{} new dog(s) added!!'.format(len(changes[0])))
-            dict_pretty_print(changes[0])
-    if changes[1]:
-        print()
-        if mode == 'color':
-            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
-            cprint('{} new dog(s) adopted!!'.format(len(changes[1])), 'yellow')
-            dict_pretty_print(changes[1], colored_sex=True)
-        else:
-            print('{} new dog(s) adopted!!'.format(len(changes[1])))
-            dict_pretty_print(changes[1])
-    return any(changes)
 
 
 def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: bool = False,
@@ -423,55 +289,55 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
     first_run = True
     try:
         while True:
-            curr_dict = dog_list_to_df(fetch_dogs_list(driver))
+            curr_df = dog_list_to_df(fetch_dogs_list(driver))
             if first_run:
                 print('\n\n\nstarting loop...')
                 if 'data' in cache:
-                    cached_dict = cache['data']
+                    cached_df = cache['data']
                     cached_time = cache['time']
                     if color_print == 'color':
                         cprint('found cache from {} with {} available dogs'.format(
-                            cached_time, len(cached_dict)), 'green')
-                        df_pretty_print(cached_dict, colored_sex=True)
-                        curr_dict = dog_list_to_df(fetch_dogs_list(driver))
-                        changes = compare_dfs(cached_dict, curr_dict)
+                            cached_time, len(cached_df)), 'green')
+                        df_pretty_print(cached_df, colored_sex=True)
+                        curr_df = dog_list_to_df(fetch_dogs_list(driver))
+                        changes = compare_dfs(cached_df, curr_df)
                         print_refresh_report_df(changes, mode=color_print)
                     else:
                         print('found cache from {} with {} available dogs'.format(
-                            cached_time, len(cached_dict)))
-                        df_pretty_print(cached_dict, colored_sex=False)
-                        curr_dict = dog_list_to_df(fetch_dogs_list(driver))
-                        changes = compare_dfs(cached_dict, curr_dict)
+                            cached_time, len(cached_df)))
+                        df_pretty_print(cached_df, colored_sex=False)
+                        curr_df = dog_list_to_df(fetch_dogs_list(driver))
+                        changes = compare_dfs(cached_df, curr_df)
                         print_refresh_report_df(changes)
                 else:
                     if color_print == 'color':
                         cprint('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                             '%Y-%m-%d %H:%M:%S')), 'green')
-                        cprint('detected {} dogs available\n'.format(len(curr_dict)), 'green')
-                        df_pretty_print(curr_dict, colored_sex=True)
+                        cprint('detected {} dogs available\n'.format(len(curr_df)), 'green')
+                        df_pretty_print(curr_df, colored_sex=True)
                     else:
                         print('monitoring loop started: {}'.format(dt.strftime(dt.now(),
                             '%Y-%m-%d %H:%M:%S')))
-                        print('detected {} dogs available\n'.format(len(curr_dict)))
-                        df_pretty_print(curr_dict)
+                        print('detected {} dogs available\n'.format(len(curr_df)))
+                        df_pretty_print(curr_df)
                 first_run = False
-                old_dict = curr_dict
+                old_df = curr_df
                 continue
-            curr_dict = dog_list_to_df(fetch_dogs_list(driver))
-            changes = compare_dfs(old_dict, curr_dict)
+            curr_df = dog_list_to_df(fetch_dogs_list(driver))
+            changes = compare_dfs(old_df, curr_df)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
             changed = print_refresh_report_df(changes, mode=color_print)
             if changed:
                 if color_print == 'color':
-                    cprint('Available dogs: {}'.format(len(curr_dict)), 'green')
+                    cprint('Available dogs: {}'.format(len(curr_df)), 'green')
                 else:
-                    print('Available dogs: {}'.format(len(curr_dict)))
-            old_dict = curr_dict
+                    print('Available dogs: {}'.format(len(curr_df)))
+            old_df = curr_df
             time.sleep(interval)
     except KeyboardInterrupt:
         print('\nsaving cache...')
-        save_to_cache(cache, curr_dict)
+        save_to_cache(cache, curr_df)
         print('quitting...')
         return
 

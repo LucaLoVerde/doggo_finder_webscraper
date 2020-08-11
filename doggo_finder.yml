@@ -2,9 +2,9 @@ name: doggo_finder
 channels:
   - defaults
   - conda-forge
-  - pip
 dependencies:
   - python=3.8
+  - pip
   - selenium
   - termcolor
   - diskcache

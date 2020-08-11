@@ -340,6 +340,12 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                 old_df = curr_df
                 continue
             curr_df = dog_list_to_df(fetch_dogs_list(driver))
+            if len(curr_df) == 0:
+                if color_print == 'color':
+                    cprint('Returned listing is empty. Network problem?', 'red')
+                else:
+                    print('Returned listing is empty. Network problem')
+                time.sleep(interval)
             changes = compare_dfs(old_df, curr_df)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
@@ -399,8 +405,11 @@ def save_to_cache(cache: Cache, data: dict):
     data : dict
         Dogs listing dictionary to cache for future use.
     """
-    cache['data'] = data
-    cache['time'] = dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')
+    if len(data) == 0 or data is None:
+        print('Nothing to save in cache.')
+    else:
+        cache['data'] = data
+        cache['time'] = dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')
     cache.close()
 
 

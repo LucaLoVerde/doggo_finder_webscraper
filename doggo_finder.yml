@@ -2,6 +2,7 @@ name: doggo_finder
 channels:
   - defaults
   - conda-forge
+  - pip
 dependencies:
   - python=3.8
   - selenium
@@ -10,6 +11,7 @@ dependencies:
   - tabulate
   - pandas
   - typing
-  - webdriver-manager
+  - pip:
+    - webdriver-manager
 prefix: /home/luca/progs/anaconda3/envs/doggo_finder
 

@@ -4,6 +4,7 @@ Uses selenium with a browser instance to pull the available rescue doggos list
 from my favorite local rescue service, whose website doesn't allow to receive
 updates.
 
+// TODO ! clean up loop function, changes printing logic should be abstracted
 // TODO should reprint the whole list after a second, longer interval
 // TODO handle screen cleaning at startup/on periodic list reprinting?
 // TODO timestamp each dog's addition to the list?
@@ -305,14 +306,24 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                         df_pretty_print(cached_df, colored_sex=True)
                         curr_df = dog_list_to_df(fetch_dogs_list(driver))
                         changes = compare_dfs(cached_df, curr_df)
-                        print_refresh_report_df(changes, mode=color_print)
+                        changed = print_refresh_report_df(changes, mode=color_print)
+                        if changed:
+                            if color_print == 'color':
+                                cprint('Available dogs: {}'.format(len(curr_df)), 'green')
+                            else:
+                                print('Available dogs: {}'.format(len(curr_df)))
                     else:
                         print('found cache from {} with {} available dogs'.format(
                             cached_time, len(cached_df)))
                         df_pretty_print(cached_df, colored_sex=False)
                         curr_df = dog_list_to_df(fetch_dogs_list(driver))
                         changes = compare_dfs(cached_df, curr_df)
-                        print_refresh_report_df(changes)
+                        changed = print_refresh_report_df(changes)
+                        if changed:
+                            if color_print == 'color':
+                                cprint('Available dogs: {}'.format(len(curr_df)), 'green')
+                            else:
+                                print('Available dogs: {}'.format(len(curr_df)))
                 else:
                     if color_print == 'color':
                         cprint('monitoring loop started: {}'.format(dt.strftime(

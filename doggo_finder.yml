@@ -10,5 +10,6 @@ dependencies:
   - tabulate
   - pandas
   - typing
+  - webdriver-manager
 prefix: /home/luca/progs/anaconda3/envs/doggo_finder
 

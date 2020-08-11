@@ -297,7 +297,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
         while True:
             if first_run:
                 print('\n\n\nstarting loop...')
-                if 'data' in cache:
+                if 'data' in cache and len(cache['data']) > 0:
                     cached_df = cache['data']
                     cached_time = cache['time']
                     if color_print == 'color':

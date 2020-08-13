@@ -212,6 +212,12 @@ def compare_dfs(old_df: pd.DataFrame, new_df: pd.DataFrame) -> Tuple[Optional[pd
     return (new_dogs_df, adopted_dogs_df)
 
 
+def my_print(text: str, color_mode: bool, color: Optional[str] = ''):
+    if color_mode:
+        text = colored(text, color)
+    print(text)
+
+
 def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = None) -> bool:
     """Print a somewhat formatted report of adopted/added dogs (dataframe).
 
@@ -232,27 +238,18 @@ def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = N
     """
     if verbose:
         pass
+    color_flag = mode == 'color'
     if changes[0] is not None:
         print()
-        if mode == 'color':
-            cprint('*' * 80, 'red')
-            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'red')
-            cprint('{} new dog(s) added!!'.format(len(changes[0])), 'red')
-            df_pretty_print(changes[0], colored_sex=True)
-        else:
-            print('*' * 80)
-            print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'))
-            print('{} new dog(s) added!!'.format(len(changes[0])))
-            df_pretty_print(changes[0])
+        my_print('*' * 80, color_flag, 'red')
+        my_print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), color_flag, 'red')
+        my_print('{} new dog(s) added!!'.format(len(changes[0])), color_flag, 'red')
+        df_pretty_print(changes[0], colored_sex=color_flag)
     if changes[1] is not None:
         print()
-        if mode == 'color':
-            cprint(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), 'yellow')
-            cprint('{} new dog(s) adopted!!'.format(len(changes[1])), 'yellow')
-            df_pretty_print(changes[1], colored_sex=True)
-        else:
-            print('{} new dog(s) adopted!!'.format(len(changes[1])))
-            df_pretty_print(changes[1])
+        my_print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), color_flag, 'yellow')
+        my_print('{} new dog(s) added!!'.format(len(changes[0])), color_flag, 'yellow')
+        df_pretty_print(changes[0], colored_sex=color_flag)
     return (changes[0] is not None) or (changes[1] is not None)
 
 
@@ -292,6 +289,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
         for colored console output, REQUIRES the termcolor module installed)
     """
     first_run = True
+    color_flag = color_print == 'color'
     try:
         curr_df = dog_list_to_df(fetch_dogs_list(driver))
         while True:
@@ -300,61 +298,36 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                 if 'data' in cache and len(cache['data']) > 0:
                     cached_df = cache['data']
                     cached_time = cache['time']
-                    if color_print == 'color':
-                        cprint('found cache from {} with {} available dogs'.format(
-                            cached_time, len(cached_df)), 'green')
-                        df_pretty_print(cached_df, colored_sex=True)
-                        curr_df = dog_list_to_df(fetch_dogs_list(driver))
-                        changes = compare_dfs(cached_df, curr_df)
-                        changed = print_refresh_report_df(changes, mode=color_print)
-                        if changed:
-                            if color_print == 'color':
-                                cprint('Available dogs: {}'.format(len(curr_df)), 'green')
-                            else:
-                                print('Available dogs: {}'.format(len(curr_df)))
-                    else:
-                        print('found cache from {} with {} available dogs'.format(
-                            cached_time, len(cached_df)))
-                        df_pretty_print(cached_df, colored_sex=False)
-                        curr_df = dog_list_to_df(fetch_dogs_list(driver))
-                        changes = compare_dfs(cached_df, curr_df)
-                        changed = print_refresh_report_df(changes)
-                        if changed:
-                            if color_print == 'color':
-                                cprint('Available dogs: {}'.format(len(curr_df)), 'green')
-                            else:
-                                print('Available dogs: {}'.format(len(curr_df)))
+                    my_print('found cache from {} with {} available dogs'.format(
+                        cached_time, len(cached_df)), color_flag, 'green')
+                    df_pretty_print(cached_df, colored_sex=color_flag)
+                    curr_df = dog_list_to_df(fetch_dogs_list(driver))
+                    changes = compare_dfs(cached_df, curr_df)
+                    changed = print_refresh_report_df(changes, mode=color_flag)
+                    if changed:
+                        my_print('Available dogs: {}'.format(len(curr_df)),
+                            color_flag, 'green')
                 else:
-                    if color_print == 'color':
-                        cprint('monitoring loop started: {}'.format(dt.strftime(
-                            dt.now(), '%Y-%m-%d %H:%M:%S')), 'green')
-                        cprint('detected {} dogs available\n'.format(len(curr_df)),
-                            'green')
-                        df_pretty_print(curr_df, colored_sex=True)
-                    else:
-                        print('monitoring loop started: {}'.format(dt.strftime(
-                            dt.now(), '%Y-%m-%d %H:%M:%S')))
-                        print('detected {} dogs available\n'.format(len(curr_df)))
-                        df_pretty_print(curr_df)
+                    my_print('monitoring loop started: {}'.format(dt.strftime(
+                        dt.now(), '%Y-%m-%d %H:%M:%S')), color_flag, 'green')
+                    my_print('detected {} dogs available\n'.format(len(curr_df)),
+                        color_flag, 'green')
+                    df_pretty_print(curr_df, colored_sex=color_flag)
                 first_run = False
                 old_df = curr_df
                 continue
             curr_df = dog_list_to_df(fetch_dogs_list(driver))
             if len(curr_df) == 0:
-                if color_print == 'color':
-                    cprint('Returned listing is empty. Network problem?', 'red')
-                else:
-                    print('Returned listing is empty. Network problem')
+                my_print('Returned listing is empty. Network problem?',
+                    color_flag, 'red')
                 time.sleep(interval)
             changes = compare_dfs(old_df, curr_df)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
-            changed = print_refresh_report_df(changes, mode=color_print)
+            changed = print_refresh_report_df(changes, mode=color_flag)
             if changed:
-                if color_print == 'color':
-                    cprint('Available dogs: {}'.format(len(curr_df)), 'green')
-                else:
-                    print('Available dogs: {}'.format(len(curr_df)))
+                my_print('Available dogs: {}'.format(len(curr_df)), color_flag,
+                    'green')
             old_df = curr_df
             time.sleep(interval)
     except KeyboardInterrupt:

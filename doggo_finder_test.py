@@ -25,7 +25,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from termcolor import cprint, colored
+from termcolor import colored
 
 
 def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
@@ -213,6 +213,19 @@ def compare_dfs(old_df: pd.DataFrame, new_df: pd.DataFrame) -> Tuple[Optional[pd
 
 
 def my_print(text: str, color_mode: bool, color: Optional[str] = ''):
+    """Colored print function.
+
+    Little helper function created just to keep branching at bay.
+
+    Parameters
+    ----------
+    text : str
+        Text to be printed
+    color_mode : bool
+        Print in color?
+    color : Optional[str], optional
+        if color_mode is True, use this color to print, by default ''
+    """
     if color_mode:
         text = colored(text, color)
     print(text)

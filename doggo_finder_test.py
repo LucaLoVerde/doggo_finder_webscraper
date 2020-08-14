@@ -334,6 +334,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                 my_print('Returned listing is empty. Network problem?',
                     color_flag, 'red')
                 time.sleep(interval)
+                continue
             changes = compare_dfs(old_df, curr_df)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))

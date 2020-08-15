@@ -316,7 +316,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                     df_pretty_print(cached_df, colored_sex=color_flag)
                     curr_df = dog_list_to_df(fetch_dogs_list(driver))
                     changes = compare_dfs(cached_df, curr_df)
-                    changed = print_refresh_report_df(changes, mode=color_flag)
+                    changed = print_refresh_report_df(changes, mode=color_print)
                     if changed:
                         my_print('Available dogs: {}'.format(len(curr_df)),
                             color_flag, 'green')
@@ -338,7 +338,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
             changes = compare_dfs(old_df, curr_df)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
-            changed = print_refresh_report_df(changes, mode=color_flag)
+            changed = print_refresh_report_df(changes, mode=color_print)
             if changed:
                 my_print('Available dogs: {}'.format(len(curr_df)), color_flag,
                     'green')

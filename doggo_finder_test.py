@@ -278,6 +278,17 @@ def close_connection(driver: WebDriverClass):
     time.sleep(1)
 
 
+def print_report(curr_df: pd.DataFrame, changes: Tuple[Optional[pd.DataFrame]],
+            report_type: str = 'normal', color_mode: str = '',
+            cache_time: str = ''):
+    if report_type == 'initial':
+        raise NotImplementedError
+    elif report_type == 'normal':
+        raise NotImplementedError
+    else:
+        raise NotImplementedError
+
+
 def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: bool = False,
         color_print: str = None):
     """Dog list monitoring loop.
@@ -308,7 +319,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
         while True:
             if first_run:
                 print('\n\n\nstarting loop...')
-                if 'data' in cache and len(cache['data']) > 0:
+                if 'data' in cache and len(cache['data']) > 0:  # first run, cache present
                     cached_df = cache['data']
                     cached_time = cache['time']
                     my_print('found cache from {} with {} available dogs'.format(
@@ -320,7 +331,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                     if changed:
                         my_print('Available dogs: {}'.format(len(curr_df)),
                             color_flag, 'green')
-                else:
+                else:  # first run, cache not present
                     my_print('monitoring loop started: {}'.format(dt.strftime(
                         dt.now(), '%Y-%m-%d %H:%M:%S')), color_flag, 'green')
                     my_print('detected {} dogs available\n'.format(len(curr_df)),
@@ -329,6 +340,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                 first_run = False
                 old_df = curr_df
                 continue
+            # nonfirst run
             curr_df = dog_list_to_df(fetch_dogs_list(driver))
             if len(curr_df) == 0:
                 my_print('Returned listing is empty. Network problem?',

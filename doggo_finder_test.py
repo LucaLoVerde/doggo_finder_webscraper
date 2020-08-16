@@ -250,7 +250,7 @@ def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = N
         True if dogs were added or adopted
     """
     if verbose:
-        pass
+        print(str(changes[0]) + '\n' + str(changes[1]))
     color_flag = mode == 'color'
     if changes[0] is not None:
         print()
@@ -261,8 +261,8 @@ def print_refresh_report_df(changes: tuple, verbose: bool = False, mode: str = N
     if changes[1] is not None:
         print()
         my_print(dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S'), color_flag, 'yellow')
-        my_print('{} new dog(s) added!!'.format(len(changes[0])), color_flag, 'yellow')
-        df_pretty_print(changes[0], colored_sex=color_flag)
+        my_print('{} new dog(s) adopted!!'.format(len(changes[1])), color_flag, 'yellow')
+        df_pretty_print(changes[1], colored_sex=color_flag)
     return (changes[0] is not None) or (changes[1] is not None)
 
 
@@ -316,7 +316,8 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                     df_pretty_print(cached_df, colored_sex=color_flag)
                     curr_df = dog_list_to_df(fetch_dogs_list(driver))
                     changes = compare_dfs(cached_df, curr_df)
-                    changed = print_refresh_report_df(changes, mode=color_print)
+                    changed = print_refresh_report_df(changes, mode=color_print,
+                        verbose=verbose)
                     if changed:
                         my_print('Available dogs: {}'.format(len(curr_df)),
                             color_flag, 'green')
@@ -338,7 +339,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
             changes = compare_dfs(old_df, curr_df)
             if verbose:
                 print('comparison says {}, continuing...'.format(changes))
-            changed = print_refresh_report_df(changes, mode=color_print)
+            changed = print_refresh_report_df(changes, mode=color_print, verbose=verbose)
             if changed:
                 my_print('Available dogs: {}'.format(len(curr_df)), color_flag,
                     'green')

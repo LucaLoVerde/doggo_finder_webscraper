@@ -139,7 +139,6 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
         elif 'Male' in tmp_sex:
             sexes.append('M')
         else:
-            # raise TypeError("Cannot parse {}'s sex".format(names[-1]))
             sexes.append('?')
     dog_df = pd.DataFrame({'name': names, 'breed': breeds, 'age': ages,
         'sex': sexes})

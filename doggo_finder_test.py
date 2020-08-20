@@ -332,8 +332,8 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                 continue
             curr_df = dog_list_to_df(fetch_dogs_list(driver))
             if len(curr_df) == 0:
-                my_print('Returned listing is empty. Network problem?',
-                    color_flag, 'red')
+                my_print('Returned listing is empty. Network problem? ({})'.format(
+                    dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')), color_flag, 'red')
                 time.sleep(interval)
                 continue
             changes = compare_dfs(old_df, curr_df)

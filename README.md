@@ -15,6 +15,9 @@
 
 <!-- /code_chunk_output -->
 
+**2020-09-22** - I've found a dog to adopt, therefore I don't think I will be working on this in the near future.
+
+**Kind suggestion to anyone trying to adopt a rescue dog**: do me and yourself a favor and just find a physical shelter (possibly one you personally trust) on your territory where they still allow in-person meetings with the dogs. You want to really know the situation of the dog you will adopt before committing.
 
 Exercising a bit with webscraping using selenium with python. I started this when I realized that one of my favorite local animal rescue websites doesn't really offer any way of receiving updates when a new dog is added to the list. It's being enough of a frustrating experience so far that I thought I could try to learn a bit of webscraping methods. If you are looking for rigorous, clean stuff, be advised that this might not be the right place (:
 

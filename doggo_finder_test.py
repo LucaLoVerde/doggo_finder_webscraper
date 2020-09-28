@@ -123,6 +123,8 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     sexes = []
     for dog in in_list:
         tmp_sublist = dog.split('\n')
+        if 'Zurich' in tmp_sublist[0]:
+            continue
         names.append(tmp_sublist[0])
         breeds.append(tmp_sublist[1])
         tmp2_sublist = tmp_sublist[2].split('-')

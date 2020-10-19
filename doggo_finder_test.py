@@ -67,6 +67,40 @@ def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
     return driver
 
 
+def init_data_grabber(instance_type: str) -> WebDriverClass:
+    """DESCRIPTION.
+
+    Parameters
+    ----------
+    instance_type : str
+        Type of webdriver instance ('firefox' or 'chrome')
+
+    Returns
+    -------
+    WebDriverClass
+        webdriver instance on target URL
+
+    Raises
+    ------
+    ValueError
+        Raised if a wrong 'instance_type' argument is provided
+    """
+    if instance_type.lower() == 'firefox':
+        capabilities_argument = DesiredCapabilities().FIREFOX
+        capabilities_argument["marionette"] = True
+        driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(),
+            capabilities=capabilities_argument)
+    elif instance_type.lower() == 'chrome':
+        driver = webdriver.Chrome(executable_path=ChromeDriverManager().install())
+    else:
+        raise ValueError("'instance_type' can be either 'firefox' or 'chrome'")
+    driver.minimize_window()
+    time.sleep(1)
+    driver.get('about:blank')
+    time.sleep(1)
+    return driver
+
+
 def fetch_dogs_list(driver: WebDriverClass) -> list:
     """Fetch list of available rescue dogs.
 
@@ -92,7 +126,14 @@ def fetch_dogs_list(driver: WebDriverClass) -> list:
     return dog_list
 
 
-def dog_list_to_df(in_list: list) -> pd.DataFrame:
+def fetch_dogs_links(driver: WebDriverClass) -> list:
+    driver.refresh()
+    time.sleep(2)
+    links_list_tmp = driver.find_elements_by_xpath("//div[@class='dogs col-md-12']/span/a")
+    return [elem.get_attribute('href') for elem in links_list_tmp]
+
+
+def dog_list_to_df(in_list: list, in_links: list) -> pd.DataFrame:
     """Convert available dog list to pandas DataFrame.
 
     Converts a list of dogs available for adoption (as returned by
@@ -103,6 +144,8 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     ----------
     in_list : list
         List of available dogs, as returned by fetch_dogs_list()
+    in_links : list
+        List of links for each available dog's page
 
     Returns
     -------
@@ -121,12 +164,14 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
     breeds = []
     ages = []
     sexes = []
-    for dog in in_list:
+    links = []
+    for dog, link in zip(in_list, in_links):
         tmp_sublist = dog.split('\n')
-        if 'Zurich' in tmp_sublist[0]:
-            continue
+        # if 'Zurich' in tmp_sublist[0]:
+        #     continue
         names.append(tmp_sublist[0])
         breeds.append(tmp_sublist[1])
+        links.append(link)
         tmp2_sublist = tmp_sublist[2].split('-')
         assert len(tmp2_sublist) <= 3, "Format for dog age/sex changed?"
         if len(tmp2_sublist) == 2:
@@ -143,10 +188,35 @@ def dog_list_to_df(in_list: list) -> pd.DataFrame:
         else:
             sexes.append('?')
     dog_df = pd.DataFrame({'name': names, 'breed': breeds, 'age': ages,
-        'sex': sexes})
+        'sex': sexes, 'link': links})
     dog_df['sex'] = dog_df['sex'].astype('category')
     dog_df = dog_df.set_index('name')
     return dog_df
+
+
+def fetch_dog_page(driver: WebDriverClass, dog: pd.DataFrame):
+    driver.get(dog.link)
+    time.sleep(1)
+    name = driver.find_element_by_xpath("//div[@class='col-xs-12 pet-bio card']/h2").text
+    # info = driver.find_elements_by_xpath("//div[@class='col-xs-12 pet-bio card']/p")
+    breed = driver.find_element_by_xpath("//p[@class='breed']").text
+    properties = [el.text for el in driver.find_elements_by_xpath(
+        "//p[@class='properties']"
+    )]
+    bio = [el.text for el in driver.find_elements_by_xpath("//p[@class='bio']")]
+    # imgs = list(set([img.get_attribute('src') for img in driver.find_elements_by_xpath("//div/img")]))
+    imgs = list({
+        img.get_attribute('src') for img in driver.find_elements_by_xpath("//div/img")
+    })
+    # print([el.text for el in name])
+    # print([(el.get_attribute('class'), el.text) for el in info])
+    return (name, breed, properties, bio, imgs)
+
+
+# stub for fetching the dogs pics from a dog's page
+# grabber.get(LINK_TO_DOG_PAGE)
+# imgs = grabber.find_elements_by_xpath("//div/img")
+# unique_img_URLs = set([im.get_attribute('src') for im in imgs])
 
 
 def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False,

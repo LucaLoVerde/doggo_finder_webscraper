@@ -15,6 +15,7 @@ updates.
 
 import time
 import sys
+import re
 from datetime import datetime as dt
 from typing import Tuple, Optional
 import pandas as pd
@@ -25,6 +26,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver as WebDriverClass
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import NoSuchElementException
 from termcolor import colored
 
 
@@ -68,7 +70,7 @@ def open_connection(target_url: str, instance_type: str) -> WebDriverClass:
 
 
 def init_data_grabber(instance_type: str) -> WebDriverClass:
-    """DESCRIPTION.
+    """Initialize dog pages WebDriver instance.
 
     Parameters
     ----------
@@ -127,6 +129,18 @@ def fetch_dogs_list(driver: WebDriverClass) -> list:
 
 
 def fetch_dogs_links(driver: WebDriverClass) -> list:
+    """Fetch individual dog pages links for the listed dogs.
+
+    Parameters
+    ----------
+    driver : WebDriverClass
+        [description]
+
+    Returns
+    -------
+    list
+        [description]
+    """
     driver.refresh()
     time.sleep(2)
     links_list_tmp = driver.find_elements_by_xpath("//div[@class='dogs col-md-12']/span/a")
@@ -165,6 +179,7 @@ def dog_list_to_df(in_list: list, in_links: list) -> pd.DataFrame:
     ages = []
     sexes = []
     links = []
+    tmp_sex = ''
     for dog, link in zip(in_list, in_links):
         tmp_sublist = dog.split('\n')
         # if 'Zurich' in tmp_sublist[0]:
@@ -195,32 +210,49 @@ def dog_list_to_df(in_list: list, in_links: list) -> pd.DataFrame:
 
 
 def fetch_dog_page(driver: WebDriverClass, dog: pd.DataFrame):
+    """DESCRIBE.
+
+    Parameters
+    ----------
+    driver : WebDriverClass
+        [description]
+    dog : pd.DataFrame
+        [description]
+
+    Returns
+    -------
+    pd.DataFrame
+        [description]
+    """
     driver.get(dog.link)
     time.sleep(1)
-    name = driver.find_element_by_xpath("//div[@class='col-xs-12 pet-bio card']/h2").text
-    # info = driver.find_elements_by_xpath("//div[@class='col-xs-12 pet-bio card']/p")
-    breed = driver.find_element_by_xpath("//p[@class='breed']").text
-    properties = [el.text for el in driver.find_elements_by_xpath(
-        "//p[@class='properties']"
-    )]
-    bio = [el.text for el in driver.find_elements_by_xpath("//p[@class='bio']")]
-    # imgs = list(set([img.get_attribute('src') for img in driver.find_elements_by_xpath("//div/img")]))
-    imgs = list({
-        img.get_attribute('src') for img in driver.find_elements_by_xpath("//div/img")
-    })
-    # print([el.text for el in name])
-    # print([(el.get_attribute('class'), el.text) for el in info])
-    return (name, breed, properties, bio, imgs)
-
-
-# stub for fetching the dogs pics from a dog's page
-# grabber.get(LINK_TO_DOG_PAGE)
-# imgs = grabber.find_elements_by_xpath("//div/img")
-# unique_img_URLs = set([im.get_attribute('src') for im in imgs])
+    try:
+        name = driver.find_element_by_xpath("//div[@class='col-xs-12 pet-bio card']/h2").text
+        breed = driver.find_element_by_xpath("//p[@class='breed']").text
+        stats = driver.find_element_by_xpath("//p[@class='stats']").text
+        age = re.findall(r'\d+(?:-\d+)? (?:months?|years?|weeks?)', stats) or None
+        sex = re.findall(r'Male|Female', stats) or None
+        tags = "\n".join([el.text for el in driver.find_elements_by_xpath(
+            "//p[@class='properties']"
+        )])
+        bio = "\n".join([el.text for el in driver.find_elements_by_xpath("//p[@class='bio']")])
+        # imgs = list({
+        #     img.get_attribute('src') for img in driver.find_elements_by_xpath("//div/img")
+        # })
+    except NoSuchElementException:
+        print("Couldn't retrieve dog page for {}".format(dog.name))
+        return None
+    fee = re.findall(r'\$\d+', bio) or None
+    assert dog.name == name
+    print((name, breed, fee, age, tags, bio))
+    dog_page_df = pd.DataFrame({"name": name, "breed": breed, "fee": fee,
+        "age": age, "sex": sex, "tags": tags, "bio": bio}, index=[0])
+    dog_page_df = dog_page_df.set_index('name')
+    return dog_page_df
 
 
 def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False,
-        header: bool = False):
+        header: bool = False, exclude_links: bool = True):
     """Print dogs listing DataFrames.
 
     Parameters
@@ -231,7 +263,11 @@ def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False,
         [description], by default False
     header : bool, optional
         [description], by default False
+    exclude_links : bool, optional
+        whether to omit the "links" column from the reports, by default True
     """
+    if exclude_links:
+        in_df = in_df.drop(columns=['link'])
     if header:
         cols = ['idx'] + list(in_df.columns)
     else:
@@ -351,7 +387,7 @@ def close_connection(driver: WebDriverClass):
 
 
 def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: bool = False,
-        color_print: str = None):
+        color_print: str = None, grabber: WebDriverClass = None):
     """Dog list monitoring loop.
 
     Heavy lifting of the update checking loop. On first run, it checks the cache,
@@ -372,11 +408,15 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
     color_print : str, optional
         printing mode for changes in the dogs listing (currently can be: "color"
         for colored console output, REQUIRES the termcolor module installed)
+    grabber : WebDriverClass
+        selenium webdriver instance for the individual dog pages, by default None
     """
     first_run = True
     color_flag = color_print == 'color'
+    old_df = None
+    curr_df = None
     try:
-        curr_df = dog_list_to_df(fetch_dogs_list(driver))
+        curr_df = dog_list_to_df(fetch_dogs_list(driver), fetch_dogs_links(driver))
         while True:
             if first_run:
                 print('\n\n\nstarting loop...')
@@ -386,7 +426,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                     my_print('found cache from {} with {} available dogs'.format(
                         cached_time, len(cached_df)), color_flag, 'green')
                     df_pretty_print(cached_df, colored_sex=color_flag)
-                    curr_df = dog_list_to_df(fetch_dogs_list(driver))
+                    curr_df = dog_list_to_df(fetch_dogs_list(driver), fetch_dogs_links(driver))
                     changes = compare_dfs(cached_df, curr_df)
                     changed = print_refresh_report_df(changes, mode=color_print,
                         verbose=verbose)
@@ -402,7 +442,7 @@ def simple_loop(driver: WebDriverClass, interval: float, cache: Cache, verbose: 
                 first_run = False
                 old_df = curr_df
                 continue
-            curr_df = dog_list_to_df(fetch_dogs_list(driver))
+            curr_df = dog_list_to_df(fetch_dogs_list(driver), fetch_dogs_links(driver))
             if len(curr_df) == 0:
                 my_print('Returned listing is empty. Network problem? ({})'.format(
                     dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')), color_flag, 'red')
@@ -479,9 +519,11 @@ if __name__ == "__main__":
     CACHE_PATH = 'cache'  # for now, 'cache' subfolder in current dif
 
     my_driver = open_connection(TARGET_URL, 'chrome')
+    my_grabber = init_data_grabber('chrome')
     my_cache = load_cache(path=CACHE_PATH, verbose=False)
     simple_loop(driver=my_driver, interval=CHECK_INTERVAL, cache=my_cache,
-        verbose=False, color_print='color')
+        verbose=False, color_print='color', grabber=my_grabber)
     time.sleep(1)
     close_connection(my_driver)
+    close_connection(my_grabber)
     sys.exit(0)

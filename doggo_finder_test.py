@@ -134,12 +134,12 @@ def fetch_dogs_links(driver: WebDriverClass) -> list:
     Parameters
     ----------
     driver : WebDriverClass
-        [description]
+        webdriver to use to get every dog's individual page link
 
     Returns
     -------
     list
-        [description]
+        list containing a link for each dog listed
     """
     driver.refresh()
     time.sleep(2)
@@ -169,7 +169,7 @@ def dog_list_to_df(in_list: list, in_links: list) -> pd.DataFrame:
     Raises
     ------
     TypeError
-        Parsing error for dog gender
+        Parsing error for dog sex
     AssertionError
         They probably changed the way they format the info, screwing up my way
         of separating each bit of info during parsing.
@@ -215,14 +215,15 @@ def fetch_dog_page(driver: WebDriverClass, dog: pd.DataFrame):
     Parameters
     ----------
     driver : WebDriverClass
-        [description]
+        webdriver for grabbing dogs' individual pages
     dog : pd.DataFrame
-        [description]
+        DataFrame (1 row) containing the target dog
 
     Returns
     -------
     pd.DataFrame
-        [description]
+        DataFrame with name, breed, fee, age, sex, tags ("good with X") and
+        biography from individual dogs' pages
     """
     driver.get(dog.link)
     time.sleep(1)
@@ -231,7 +232,7 @@ def fetch_dog_page(driver: WebDriverClass, dog: pd.DataFrame):
         breed = driver.find_element_by_xpath("//p[@class='breed']").text
         stats = driver.find_element_by_xpath("//p[@class='stats']").text
         age = re.findall(r'\d+(?:-\d+)? (?:months?|years?|weeks?)', stats) or None
-        sex = re.findall(r'Male|Female', stats) or None
+        sex = re.findall(r'Male|Female|male|female', stats) or None
         tags = "\n".join([el.text for el in driver.find_elements_by_xpath(
             "//p[@class='properties']"
         )])
@@ -244,7 +245,7 @@ def fetch_dog_page(driver: WebDriverClass, dog: pd.DataFrame):
         return None
     fee = re.findall(r'\$\d+', bio) or None
     assert dog.name == name
-    print((name, breed, fee, age, tags, bio))
+    # print((name, breed, fee, age, tags, bio))
     dog_page_df = pd.DataFrame({"name": name, "breed": breed, "fee": fee,
         "age": age, "sex": sex, "tags": tags, "bio": bio}, index=[0])
     dog_page_df = dog_page_df.set_index('name')
@@ -258,11 +259,11 @@ def df_pretty_print(in_df: pd.DataFrame, colored_sex: bool = False,
     Parameters
     ----------
     in_df : pd.DataFrame
-        [description]
+        dogs DataFrame to print out
     colored_sex : bool, optional
-        [description], by default False
+        whether to print the dogs sexes in color, by default False
     header : bool, optional
-        [description], by default False
+        include int index, by default False
     exclude_links : bool, optional
         whether to omit the "links" column from the reports, by default True
     """
@@ -292,14 +293,15 @@ def compare_dfs(old_df: pd.DataFrame, new_df: pd.DataFrame) -> Tuple[Optional[pd
     Parameters
     ----------
     old_df : pd.DataFrame
-        [description]
+        original DataFrame to compare with new one
     new_df : pd.DataFrame
-        [description]
+        new DataFrame to compare with original
 
     Returns
     -------
     Tuple[Optional[pd.DataFrame]]
-        [description]
+        tuple containing either the respective dataframe (additions, adoptions)
+        or None if no additions/adoptions
     """
     old_keys = set(old_df.index)
     new_keys = set(new_df.index)
